@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="clean" basedir="." name="smb-extension">
+	<description>
+		Build SMB Extension
+	</description>
+	<!-- set global properties for this build -->
+
+	<property file="build.properties" />
+
+	<property name="lib" location="source/java/libs" />
+	<property name="src" location="source/java/src" />
+	<property name="srcImg" location="source/images" />
+	<property name="temp" location="temp" />
+	<property name="build" location="build" />
+	<property name="dist" location="dist" />
+
+	<property name="tld" location="source/tld" />
+	<property name="fld" location="source/fld" />
+
+	<buildnumber file="build.number" />
+
+	<scriptdef name="replace" language="javascript">
+		<attribute name="haystack" />
+		<attribute name="needle" />
+		<attribute name="repl" />
+		<attribute name="property" />
+		 <![CDATA[
+			var text = attributes.get("haystack");
+			var needle = attributes.get("needle");
+			var repl = attributes.get("repl");
+			text=text.trim();
+
+			var regex = new RegExp(needle,'g');
+			text=text.replace(regex,repl);
+			project.setProperty(attributes.get("property"), text);
+		 ]]>
+	</scriptdef>
+
+	<path id="classpath">
+		<fileset dir="${lib}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp />
+
+		<delete dir="${temp}" />
+		<delete dir="${dist}" />
+
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${temp}" />
+		<mkdir dir="${build}" />
+		<mkdir dir="${dist}/" />
+
+
+	</target>
+
+
+	<target name="copy" depends="init" description="copy source file to temp">
+		<!-- copy the source -->
+		<copy todir="${temp}">
+			<fileset dir="${src}">
+				<include name="**/*.java" />
+				<exclude name="**/Test.java" />
+			</fileset>
+		</copy>
+
+
+		<tstamp>
+			<format property="NOW" pattern="yyyy-MM-dd HH:mm:ss" />
+		</tstamp>
+
+		<echo file="${dist}/extension/META-INF/MANIFEST.MF">Manifest-Version: 1.0
+Built-Date: ${NOW}
+version: "${bundleversion}${build.number}${appendix}"
+id: "${id}"
+name: "${label}"
+description: "${description}"
+lucee-core-version: "${luceeCoreVersion}"
+release-type: ${releaseType}
+start-bundles: false
+resource: "[{'class':'${class}','bundleName':'${bundlename}','bundleVersion':'${bundleversion}${build.number}${appendix}','scheme':'smb','lock-timeout':'10000'}]"
+</echo>
+	</target>
+
+
+	<target name="compile" depends="copy"
+		description="compile the source ">
+		<!-- Compile source -->
+		<javac srcdir="${temp}" source="17" target="17" destdir="${build}" debug="true"
+			debuglevel="lines,vars,source">
+			<classpath refid="classpath" />
+		</javac>
+	</target>
+
+	<target name="dist" depends="compile"
+		description="generate the distribution">
+
+
+		<!-- Put everything in ${build} into .jar file -->
+		<jar
+			jarfile="${dist}/extension/jars/${filename}-${bundleversion}${build.number}${appendix}.jar"
+			basedir="${build}" manifest="${src}/META-INF/MANIFEST.MF">
+			<manifest>
+				<attribute name="Bundle-Version" value="${bundleversion}${build.number}${appendix}" />
+				<attribute name="Built-Date" value="${NOW}" />
+				<attribute name="Bundle-SymbolicName" value="${bundlename}" />
+
+			</manifest>
+		</jar>
+
+		<!-- Create OSGi bundle from jcifs-3.0.0.jar (which lacks OSGi headers) -->
+		<mkdir dir="${temp}/osgi-jcifs" />
+		<unzip src="${lib}/jcifs-3.0.0.jar" dest="${temp}/osgi-jcifs">
+			<patternset>
+				<exclude name="META-INF/MANIFEST.MF" />
+			</patternset>
+		</unzip>
+
+		<!-- Create OSGi manifest for jcifs -->
+		<echo file="${temp}/osgi-jcifs/META-INF/MANIFEST.MF">Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: jcifs
+Bundle-Name: JCIFS SMB Client Library
+Bundle-Version: 3.0.0
+Bundle-Description: OSGi bundle for JCIFS SMB client library
+Bundle-Vendor: Lucee Association Switzerland
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Require-Bundle: bcprov;bundle-version=1.80
+Export-Package: org.codelibs.jcifs.smb;version="3.0.0",
+ org.codelibs.jcifs.smb.config;version="3.0.0",
+ org.codelibs.jcifs.smb.context;version="3.0.0",
+ org.codelibs.jcifs.smb.impl;version="3.0.0",
+ org.codelibs.jcifs.smb.netbios;version="3.0.0",
+ org.codelibs.jcifs.smb.ntlmssp;version="3.0.0",
+ org.codelibs.jcifs.smb.ntlmssp.av;version="3.0.0",
+ org.codelibs.jcifs.smb.dcerpc;version="3.0.0",
+ org.codelibs.jcifs.smb.dcerpc.msrpc;version="3.0.0",
+ org.codelibs.jcifs.smb.dcerpc.ndr;version="3.0.0",
+ org.codelibs.jcifs.smb.util;version="3.0.0",
+ org.codelibs.jcifs.smb.util.transport;version="3.0.0",
+ org.codelibs.jcifs.smb.spnego;version="3.0.0",
+ org.codelibs.jcifs.smb.pac;version="3.0.0",
+ org.codelibs.jcifs.smb.pac.kerberos;version="3.0.0",
+ org.codelibs.jcifs.smb.internal;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.dfs;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.dtyp;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.fscc;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.util;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb1;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb1.com;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb1.net;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb1.trans;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb1.trans.nt;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb1.trans2;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb2;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb2.create;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb2.info;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb2.io;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb2.ioctl;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb2.lock;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb2.nego;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb2.notify;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb2.session;version="3.0.0",
+ org.codelibs.jcifs.smb.internal.smb2.tree;version="3.0.0",
+ org.codelibs.jcifs.smb.http;version="3.0.0",
+ org.codelibs.jcifs.smb.https;version="3.0.0",
+ org.codelibs.jcifs.smb1;version="3.0.0",
+ org.codelibs.jcifs.smb1.dcerpc;version="3.0.0",
+ org.codelibs.jcifs.smb1.dcerpc.msrpc;version="3.0.0",
+ org.codelibs.jcifs.smb1.dcerpc.ndr;version="3.0.0",
+ org.codelibs.jcifs.smb1.http;version="3.0.0",
+ org.codelibs.jcifs.smb1.https;version="3.0.0",
+ org.codelibs.jcifs.smb1.netbios;version="3.0.0",
+ org.codelibs.jcifs.smb1.ntlmssp;version="3.0.0",
+ org.codelibs.jcifs.smb1.util;version="3.0.0",
+ org.codelibs.jcifs.smb1.util.transport;version="3.0.0"
+Import-Package: jakarta.servlet*;resolution:=optional,
+ com.sun.security.jgss;resolution:=optional,
+ org.bouncycastle*;version="1.80",
+ org.slf4j;resolution:=optional;version="[1.6,3)"
+</echo>
+
+		<!-- Create the OSGi bundle JAR -->
+		<jar destfile="${dist}/extension/jars/jcifs-3.0.0.jar"
+			basedir="${temp}/osgi-jcifs"
+			manifest="${temp}/osgi-jcifs/META-INF/MANIFEST.MF" />
+
+		<!-- Clean up temp directory -->
+		<delete dir="${temp}/osgi-jcifs" />
+
+		<!-- copy the jars necessary (excluding jcifs since we created our own OSGi version) -->
+		<copy todir="${dist}/extension/jars">
+			<fileset dir="${lib}">
+				<include name="**/*.jar" />
+				<exclude name="**/javax.*" />
+				<exclude name="**/jsp-*" />
+				<exclude name="**/lucee.jar" />
+				<exclude name="**/jaxb-api-*" />
+				<exclude name="**/org.apache.felix.framework-*" />
+				<exclude name="**/jcifs-*.jar" />
+
+				<!-- we exclude this because this is part of the Lucee core and in worst case it is loaded
+				on the fly -->
+				<exclude name="**/httpcomponents-*" />
+				<exclude name="**/org.lucee.httpcomponents.*" />
+				<exclude name="**/log4j-*" />
+				<exclude name="**/javax-mail-activation-*" />
+			</fileset>
+		</copy>
+
+		<!-- copy the logo -->
+		<copy todir="${dist}/extension/META-INF">
+			<fileset dir="${srcImg}/">
+				<include name="logo.png" />
+			</fileset>
+		</copy>
+
+
+		<!-- Zip everything  -->
+		<zip destfile="${dist}/${filename}-${bundleversion}${build.number}${appendix}.lex">
+			<zipfileset dir="${dist}/extension" />
+		</zip>
+
+	</target>
+
+	<target name="clean" depends="dist" description="clean up">
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build}" />
+		<delete dir="${temp}" />
+	</target>
+
+</project>
