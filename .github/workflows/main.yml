@@ -76,7 +76,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: smb-lex-${{ matrix.lucee.query }}
+          name: smb-lex-${{ replace(matrix.lucee.query, '/', '-') }}
           path: target/*.lex
 
       - name: Wait for Samba to be ready
