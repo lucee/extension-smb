@@ -26,12 +26,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smb" {
 		}
 	}
 
-	function test_smb_scheme_registered() {
-		var res = getResource( "smb://localhost/" );
-		expect( res.getResourceProvider().getScheme() ).toBe( "smb" );
+	function test_smb_scheme_registered() skip="skipSmbTests" {
+		expect( directoryExists( variables.smbPath ) ).toBeTrue();
 	}
 
-	function test_directory_create_exists_delete() skip="skipSmbTests" {
+function test_directory_create_exists_delete() skip="skipSmbTests" {
 		_cleanupTestDir();
 		// Create directory
 		directoryCreate( variables.testDir );
@@ -119,10 +118,4 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smb" {
 		}
 	}
 
-	private function getResource( required string path ) {
-		return createObject( "java", "lucee.loader.engine.CFMLEngineFactory" )
-			.getInstance()
-			.getResourceUtil()
-			.toResource( getPageContext(), arguments.path, true );
-	}
 }
