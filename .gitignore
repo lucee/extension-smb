@@ -1,4 +1,7 @@
 /dist
+/maven-deploy.sh
+/temp
+/build
 **/Test.java
 **/.DS_Store
 **/.svn/

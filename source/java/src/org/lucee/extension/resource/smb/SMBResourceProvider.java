@@ -27,13 +27,13 @@ import java.util.Properties;
 
 import lucee.loader.engine.CFMLEngineFactory;
 
-import org.codelibs.jcifs.smb.CIFSContext;
-import org.codelibs.jcifs.smb.CIFSException;
-import org.codelibs.jcifs.smb.SmbResource;
-import org.codelibs.jcifs.smb.context.BaseContext;
-import org.codelibs.jcifs.smb.config.PropertyConfiguration;
-import org.codelibs.jcifs.smb.impl.NtlmPasswordAuthenticator;
-import org.codelibs.jcifs.smb.impl.SmbFile;
+import jcifs.CIFSContext;
+import jcifs.CIFSException;
+import jcifs.SmbResource;
+import jcifs.context.BaseContext;
+import jcifs.config.PropertyConfiguration;
+import jcifs.smb.NtlmPasswordAuthenticator;
+import jcifs.smb.SmbFile;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceLock;
 import lucee.commons.io.res.ResourceProvider;

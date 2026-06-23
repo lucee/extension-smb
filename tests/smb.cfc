@@ -123,6 +123,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smb" {
 		return createObject( "java", "lucee.loader.engine.CFMLEngineFactory" )
 			.getInstance()
 			.getResourceUtil()
-			.toResourceExisting( getPageContext(), arguments.path );
+			.toResource( getPageContext(), arguments.path, true );
 	}
 }
