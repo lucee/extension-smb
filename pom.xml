@@ -4,15 +4,18 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.lucee</groupId>
     <artifactId>smb-extension</artifactId>
-    <version>1.0.0.2-RC</version>
+    <version>1.0.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>SMB Extension</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <id>A35C8501-FFBB-43EA-975C6883C92A7D5E</id>
+        <image>https://raw.githubusercontent.com/lucee/extension-smb/main/source/images/logo.png</image>
+        <buildDate>${maven.build.timestamp}</buildDate>
         <bundlename>org.lucee.smb.extension</bundlename>
         <mvnGroupId>org.lucee</mvnGroupId>
         <mvnGroupPath>org/lucee</mvnGroupPath>
