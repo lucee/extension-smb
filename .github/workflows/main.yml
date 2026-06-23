@@ -73,10 +73,14 @@ jobs:
           echo "------- Maven Install -------";
           mvn -B -e -f pom.xml clean install -Dgoal=install
 
+      - name: Set artifact name
+        id: artifact
+        run: echo "name=smb-lex-$(echo '${{ matrix.lucee.query }}' | tr '/' '-')" >> $GITHUB_OUTPUT
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: smb-lex-${{ replace(matrix.lucee.query, '/', '-') }}
+          name: ${{ steps.artifact.outputs.name }}
           path: target/*.lex
 
       - name: Wait for Samba to be ready
