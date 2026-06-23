@@ -25,6 +25,11 @@
 
     <target name="maven-build" depends="init">
 
+        <!-- default to install if goal was not passed -->
+        <condition property="maven.goal" value="install">
+            <not><isset property="maven.goal"/></not>
+        </condition>
+
         <condition property="is.deploy" value="true" else="false">
             <equals arg1="${maven.goal}" arg2="deploy"/>
         </condition>
